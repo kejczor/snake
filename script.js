@@ -7,7 +7,7 @@ class SnakeGame {
     this.snake = [{ x: 200, y: 200 }];
     this.food = this.getRandomFoodPosition();
     this.direction = "RIGHT";
-    this.directionChangedOnTick = false; // ensures that direction can be changed only once per game tick
+    this.directionChangedOnTick = false;
     this.sprite = new Image();
     this.sprite.src = spriteSrc;
     document.addEventListener("keydown", this.changeDirection.bind(this));
@@ -22,26 +22,21 @@ class SnakeGame {
         x: Math.floor(Math.random() * (this.canvas.width / 20)) * 20,
         y: Math.floor(Math.random() * (this.canvas.height / 20)) * 20,
       };
-    } while (
-      this.snake.some(
-        ({ x, y }) => x === foodPosition.x && y === foodPosition.y
-      )
-    );
+    } while (this.snake.some(({ x, y }) => x === foodPosition.x && y === foodPosition.y));
 
     return foodPosition;
   }
 
   changeDirection(event) {
-    this.directionChangedOnTick = true;
+    if (this.directionChangedOnTick) return;
+
     const key = event.key;
-    if ((key === "ArrowUp" || key === "w") && this.direction !== "DOWN")
-      this.direction = "UP";
-    else if ((key === "ArrowDown" || key === "s") && this.direction !== "UP")
-      this.direction = "DOWN";
-    else if ((key === "ArrowLeft" || key === "a") && this.direction !== "RIGHT")
-      this.direction = "LEFT";
-    else if ((key === "ArrowRight" || key === "d") && this.direction !== "LEFT")
-      this.direction = "RIGHT";
+    if ((key === "ArrowUp" || key === "w") && this.direction !== "DOWN") this.direction = "UP";
+    else if ((key === "ArrowDown" || key === "s") && this.direction !== "UP") this.direction = "DOWN";
+    else if ((key === "ArrowLeft" || key === "a") && this.direction !== "RIGHT") this.direction = "LEFT";
+    else if ((key === "ArrowRight" || key === "d") && this.direction !== "LEFT") this.direction = "RIGHT";
+
+    this.directionChangedOnTick = true;
   }
 
   gameLoop() {
@@ -79,17 +74,7 @@ class SnakeGame {
     this.ctx.fillStyle = "black";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.ctx.drawImage(
-      this.sprite,
-      0,
-      192,
-      64,
-      64,
-      this.food.x,
-      this.food.y,
-      20,
-      20
-    );
+    this.ctx.drawImage(this.sprite, 0, 192, 64, 64, this.food.x, this.food.y, 20, 20);
 
     this.snake.forEach((segment, index, array) => {
       let spriteX = 64;
@@ -135,27 +120,15 @@ class SnakeGame {
           }
         } else if (
           // generowania srodka weza skierowanego pionowo
-          (prev.x === segment.x &&
-            segment.x === next.x &&
-            prev.y < segment.y &&
-            segment.y < next.y) ||
-          (prev.x === segment.x &&
-            segment.x === next.x &&
-            prev.y > segment.y &&
-            segment.y > next.y)
+          (prev.x === segment.x && segment.x === next.x && prev.y < segment.y && segment.y < next.y) ||
+          (prev.x === segment.x && segment.x === next.x && prev.y > segment.y && segment.y > next.y)
         ) {
           spriteX = 128;
           spriteY = 64;
         } else if (
           // generowania srodka weza skierowanego poziomo
-          (prev.x < segment.x &&
-            segment.x < next.x &&
-            prev.y === segment.y &&
-            segment.y === next.y) ||
-          (prev.x > segment.x &&
-            segment.x > next.x &&
-            prev.y === segment.y &&
-            segment.y === next.y)
+          (prev.x < segment.x && segment.x < next.x && prev.y === segment.y && segment.y === next.y) ||
+          (prev.x > segment.x && segment.x > next.x && prev.y === segment.y && segment.y === next.y)
         ) {
           spriteX = 64;
           spriteY = 0;
@@ -190,28 +163,13 @@ class SnakeGame {
         }
       }
 
-      this.ctx.drawImage(
-        this.sprite,
-        spriteX,
-        spriteY,
-        64,
-        64,
-        segment.x,
-        segment.y,
-        20,
-        20
-      );
+      this.ctx.drawImage(this.sprite, spriteX, spriteY, 64, 64, segment.x, segment.y, 20, 20);
     });
   }
 
   checkCollision() {
     const head = this.snake[0];
-    if (
-      head.x < 0 ||
-      head.y < 0 ||
-      head.x >= this.canvas.width ||
-      head.y >= this.canvas.height
-    ) {
+    if (head.x < 0 || head.y < 0 || head.x >= this.canvas.width || head.y >= this.canvas.height) {
       return true;
     }
     for (let i = 1; i < this.snake.length; i++) {
